@@ -1,7 +1,10 @@
 package br.com.vemser.devdojo.dojo.entity;
 
+import lombok.Data;
+
 import java.time.LocalDate;
 
+@Data
 public class Usuario {
     private int id;
     private String nome;
@@ -9,7 +12,7 @@ public class Usuario {
     private LocalDate dataNascimento;
     private String senha;
     private LocalDate dataCriacao;
-    private boolean ativo;
+    private String ativo;
     private TipoUsuario tipoUsuario;
 
 }

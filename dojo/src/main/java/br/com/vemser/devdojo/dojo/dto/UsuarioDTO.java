@@ -1,9 +1,8 @@
 package br.com.vemser.devdojo.dojo.dto;
 
-import br.com.vemser.devdojo.dojo.entity.TipoUsuario;
+import lombok.Data;
 
-import java.time.LocalDate;
-
+@Data
 public class UsuarioDTO extends UsuarioCreateDTO {
     private int id;
 }
