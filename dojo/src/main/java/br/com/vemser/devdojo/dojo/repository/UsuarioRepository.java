@@ -1,6 +1,7 @@
 package br.com.vemser.devdojo.dojo.repository;
 
 import br.com.vemser.devdojo.dojo.config.ConexaoBancoDeDados;
+import br.com.vemser.devdojo.dojo.entity.TipoUsuario;
 import br.com.vemser.devdojo.dojo.entity.Usuario;
 import br.com.vemser.devdojo.dojo.exceptions.BancoDeDadosException;
 import br.com.vemser.devdojo.dojo.exceptions.RegraDeNegocioException;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.lang.annotation.Annotation;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -60,7 +62,8 @@ public class UsuarioRepository implements Repositorio<Integer, Usuario>{
 
             stmt.executeUpdate();
 
-            return usuario;
+
+
         } catch (SQLException e) {
             throw new BancoDeDadosException(e.getCause());
         } catch (RegraDeNegocioException e) {
@@ -74,6 +77,7 @@ public class UsuarioRepository implements Repositorio<Integer, Usuario>{
                 e.printStackTrace();
             }
         }
+        return usuario;
     }
 
     @Override
@@ -150,7 +154,79 @@ public class UsuarioRepository implements Repositorio<Integer, Usuario>{
     }
 
     @Override
-    public List<Usuario> listar() throws RegraDeNegocioException, BancoDeDadosException {
-        return null;
+    public List<Usuario> listar() throws BancoDeDadosException {
+        List<Usuario> usuarios = new ArrayList<>();
+        Connection con = null;
+        try {
+            con = conexaoBancoDeDados.getConnection();
+            Statement stmt = con.createStatement();
+
+            String sql = "SELECT * FROM USUARIO_DOJO";
+
+            ResultSet res = stmt.executeQuery(sql);
+
+            while (res.next()) {
+                Usuario usuario = new Usuario();
+                usuario.setId(res.getInt("id"));
+                usuario.setNome(res.getString("nome"));
+                usuario.setDataNascimento(res.getDate("data_nascimento").toLocalDate());
+                usuario.setSenha(res.getString("senha"));
+                usuario.setDataCriacao(res.getDate("data_criacao").toLocalDate());
+                usuario.setEmail(res.getString("email"));
+                usuario.setTipoUsuario(TipoUsuario.valueOf(res.getString("tipo_cliente")));
+                usuario.setAtivo(res.getString("ativo"));
+                usuarios.add(usuario);
+            }
+        } catch (SQLException e) {
+            throw new BancoDeDadosException(e.getCause());
+        } finally {
+            try {
+                if (con != null) {
+                    con.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return usuarios;
+    }
+
+    public Usuario listarPorId(Integer id){
+        Connection con = null;
+        try {
+            con = conexaoBancoDeDados.getConnection();
+            PreparedStatement stmt = con.createStatement();
+
+            String sql = "SELECT * FROM USUARIO_DOJO WHERE ID = ?";
+
+            stmt.setInt(1, id);
+
+            ResultSet res = stmt.executeQuery(sql);
+
+            while (res.next()) {
+                Usuario usuario = new Usuario();
+                usuario.setId(res.getInt("id"));
+                usuario.setNome(res.getString("nome"));
+                usuario.setDataNascimento(res.getDate("data_nascimento").toLocalDate());
+                usuario.setSenha(res.getString("senha"));
+                usuario.setDataCriacao(res.getDate("data_criacao").toLocalDate());
+                usuario.setEmail(res.getString("email"));
+                usuario.setTipoUsuario(TipoUsuario.valueOf(res.getString("tipo_cliente")));
+                usuario.setAtivo(res.getString("ativo"));
+                usuarios.add(usuario);
+            }
+        } catch (SQLException e) {
+            throw new BancoDeDadosException(e.getCause());
+        } finally {
+            try {
+                if (con != null) {
+                    con.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return usuarios;
+
     }
 }
