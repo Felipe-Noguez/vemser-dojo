@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Repository
-public class UsuarioRepository implements Repositorio<Integer, Usuario>{
+public class UsuarioRepository implements Repositorio<Integer, Usuario> {
 
     private ConexaoBancoDeDados conexaoBancoDeDados;
 
@@ -61,7 +61,6 @@ public class UsuarioRepository implements Repositorio<Integer, Usuario>{
             stmt.setString(8, usuario.getAtivo());
 
             stmt.executeUpdate();
-
 
 
         } catch (SQLException e) {
@@ -271,5 +270,5 @@ public class UsuarioRepository implements Repositorio<Integer, Usuario>{
 
     }
 
-    }
-    
+}
+
