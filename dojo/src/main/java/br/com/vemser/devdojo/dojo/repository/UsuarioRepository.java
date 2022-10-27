@@ -191,15 +191,55 @@ public class UsuarioRepository implements Repositorio<Integer, Usuario>{
         return usuarios;
     }
 
-    public Usuario listarPorId(Integer id){
+    public Usuario findById(Integer id) throws BancoDeDadosException {
         Connection con = null;
+        Usuario usuario = new Usuario();
         try {
             con = conexaoBancoDeDados.getConnection();
-            PreparedStatement stmt = con.createStatement();
-
             String sql = "SELECT * FROM USUARIO_DOJO WHERE ID = ?";
 
+            PreparedStatement stmt = con.prepareStatement(sql);
+
             stmt.setInt(1, id);
+
+            ResultSet res = stmt.executeQuery(sql);
+
+            while (res.next()) {
+                usuario.setId(res.getInt("id"));
+                usuario.setNome(res.getString("nome"));
+                usuario.setDataNascimento(res.getDate("data_nascimento").toLocalDate());
+                usuario.setSenha(res.getString("senha"));
+                usuario.setDataCriacao(res.getDate("data_criacao").toLocalDate());
+                usuario.setEmail(res.getString("email"));
+                usuario.setTipoUsuario(TipoUsuario.valueOf(res.getString("tipo_cliente")));
+                usuario.setAtivo(res.getString("ativo"));
+            }
+        } catch (SQLException e) {
+            throw new BancoDeDadosException(e.getCause());
+        } finally {
+            try {
+                if (con != null) {
+                    con.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return usuario;
+
+    }
+
+    public List<Usuario> findByTipo(TipoUsuario tipo) throws BancoDeDadosException {
+
+        Connection con = null;
+        List<Usuario> usuarios = new ArrayList<>();
+        try {
+            con = conexaoBancoDeDados.getConnection();
+            String sql = "SELECT * FROM USUARIO_DOJO WHERE tipo_cliente = ?";
+
+            PreparedStatement stmt = con.prepareStatement(sql);
+
+            stmt.setString(1, tipo.getTipos());
 
             ResultSet res = stmt.executeQuery(sql);
 
@@ -214,6 +254,7 @@ public class UsuarioRepository implements Repositorio<Integer, Usuario>{
                 usuario.setTipoUsuario(TipoUsuario.valueOf(res.getString("tipo_cliente")));
                 usuario.setAtivo(res.getString("ativo"));
                 usuarios.add(usuario);
+
             }
         } catch (SQLException e) {
             throw new BancoDeDadosException(e.getCause());
@@ -229,4 +270,6 @@ public class UsuarioRepository implements Repositorio<Integer, Usuario>{
         return usuarios;
 
     }
-}
+
+    }
+    
