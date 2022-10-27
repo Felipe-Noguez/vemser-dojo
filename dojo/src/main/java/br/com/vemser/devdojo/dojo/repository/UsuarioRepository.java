@@ -37,7 +37,7 @@ public class UsuarioRepository implements Repositorio<Integer, Usuario> {
     }
 
     @Override
-    public Usuario adicionar(Usuario usuario) throws BancoDeDadosException {
+    public Usuario adicionar(Usuario usuario) throws RegraDeNegocioException {
         Connection con = null;
         try {
             con = conexaoBancoDeDados.getConnection();
@@ -64,7 +64,7 @@ public class UsuarioRepository implements Repositorio<Integer, Usuario> {
 
 
         } catch (SQLException e) {
-            throw new BancoDeDadosException(e.getCause());
+            throw new RegraDeNegocioException(e.getMessage());
         } catch (RegraDeNegocioException e) {
             e.printStackTrace();
         } finally {
@@ -153,7 +153,7 @@ public class UsuarioRepository implements Repositorio<Integer, Usuario> {
     }
 
     @Override
-    public List<Usuario> listar() throws BancoDeDadosException {
+    public List<Usuario> listar() throws RegraDeNegocioException {
         List<Usuario> usuarios = new ArrayList<>();
         Connection con = null;
         try {
@@ -177,7 +177,7 @@ public class UsuarioRepository implements Repositorio<Integer, Usuario> {
                 usuarios.add(usuario);
             }
         } catch (SQLException e) {
-            throw new BancoDeDadosException(e.getCause());
+            throw new RegraDeNegocioException(e.getMessage());
         } finally {
             try {
                 if (con != null) {
@@ -268,6 +268,44 @@ public class UsuarioRepository implements Repositorio<Integer, Usuario> {
         }
         return usuarios;
 
+    }
+
+    public List<Usuario> listarMaiores() throws BancoDeDadosException {
+        List<Usuario> usuarios = new ArrayList<>();
+        Connection con = null;
+        try {
+            con = conexaoBancoDeDados.getConnection();
+            Statement stmt = con.createStatement();
+
+            String sql = "SELECT * FROM USUARIO_DOJO ud\n" +
+                    "WHERE trunc((months_between(sysdate, to_date(ud.DATA_NASCIMENTO ,'dd/mm/yyyy')))/12) >= 18";
+
+            ResultSet res = stmt.executeQuery(sql);
+
+            while (res.next()) {
+                Usuario usuario = new Usuario();
+                usuario.setId(res.getInt("id"));
+                usuario.setNome(res.getString("nome"));
+                usuario.setDataNascimento(res.getDate("data_nascimento").toLocalDate());
+                usuario.setSenha(res.getString("senha"));
+                usuario.setDataCriacao(res.getDate("data_criacao").toLocalDate());
+                usuario.setEmail(res.getString("email"));
+                usuario.setTipoUsuario(TipoUsuario.valueOf(res.getString("tipo_cliente")));
+                usuario.setAtivo(res.getString("ativo"));
+                usuarios.add(usuario);
+            }
+        } catch (SQLException e) {
+            throw new BancoDeDadosException(e.getCause());
+        } finally {
+            try {
+                if (con != null) {
+                    con.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return usuarios;
     }
 
 }
